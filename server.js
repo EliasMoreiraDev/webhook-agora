@@ -3,32 +3,31 @@ import express from 'express';
 const app = express();
 app.use(express.json());
 
-const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET 
-const BOT_TOKEN = process.env.BOT_TOKEN
-const PLATFORM_API_URL = 'https://api.agora.fslab.dev';
+const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET
+const BOT_TOKEN = process.env.BOT_TOKEN 
+const PLATFORM_API_URL = process.env.PLATFORM_API_URL || 'https://api.agora.fslab.dev';
+const MEU_USER_ID = process.env.MEU_USER_ID || '6a73e92d7237502b187d79ff';
 
 app.post('/webhook/agora', async (req, res) => {
-  console.log('--- NOVO EVENTO RECEBIDO ---');
-  console.log('Headers recebidos:', req.headers);
-  console.log('Assinatura recebida:', req.headers['x-agora-signature']);
-  console.log('Body recebido:', req.body);
-
-  if (req.headers['x-agora-signature'] !== WEBHOOK_SECRET) {
-    console.error('Assinatura inválida. A requisição será ignorada.');
-    return res.status(401).send('Assinatura inválida!');
+  const signature = req.headers['x-agora-signature'];
+  if (signature !== WEBHOOK_SECRET) {
+    return res.status(401).json({ error: 'Assinatura inválida no X-Agora-Signature' });
   }
 
-  // 1. Extrai o conversationId corretamente a partir de dados ou da raiz
-  const conversationId = req.body?.dados?.conversationId || req.body?.conversationId;
+  const dados = req.body?.dados;
+  const conversationId = dados?.conversationId || req.body?.conversationId;
+  const senderId = dados?.senderId;
 
   if (!conversationId) {
-    console.error('conversationId não encontrado no body');
     return res.status(400).send('conversationId ausente');
   }
 
+  if (senderId === MEU_USER_ID) {
+    return res.status(200).send('Mensagem do dono do bot ignorada');
+  }
+
   try {
-    // 2. Executa o fetch ANTES de encerrar a requisição com o res.status(200)
-    const respostaBot = await fetch(`${PLATFORM_API_URL}/bot/messages`, {
+    const response = await fetch(`${PLATFORM_API_URL}/bot/messages`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -40,19 +39,12 @@ app.post('/webhook/agora', async (req, res) => {
       })
     });
 
-    const statusBot = respostaBot.status;
-    const corpoBot = await respostaBot.text();
-    console.log(`Resposta do Bot Ágora [Status ${statusBot}]:`, corpoBot);
-
-    // 3. Responde com sucesso para o webhook do Ágora
+    await response.text();
     return res.status(200).send('OK');
-
-  } catch (err) {
-    console.error('Erro ao disparar mensagem do bot:', err);
+  } catch (error) {
     return res.status(500).send('Erro interno ao disparar bot');
   }
 });
 
-app.listen(5500, () => {
-  console.log('Servidor rodando na porta 5500');
-});
+const PORT = process.env.PORT || 5500;
+app.listen(PORT, () => {});
