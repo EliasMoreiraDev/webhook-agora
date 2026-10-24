@@ -13,10 +13,6 @@ app.post('/webhook/agora', async (req, res) => {
   console.log('Assinatura recebida:', req.headers['x-agora-signature']);
   console.log('Body recebido:', req.body);
 
-  if (req.headers['x-agora-signature'] !== WEBHOOK_SECRET) {
-    console.error('Assinatura inválida. A requisição será ignorada.');
-    return res.status(401).send('Assinatura inválida!');
-  }
 
   // 1. Extrai o conversationId corretamente a partir de dados ou da raiz
   const conversationId = req.body?.dados?.conversationId || req.body?.conversationId;
