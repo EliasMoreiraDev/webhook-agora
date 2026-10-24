@@ -8,7 +8,6 @@ const BOT_TOKEN = process.env.BOT_TOKEN
 const PLATFORM_API_URL = 'https://api.agora.fslab.dev';
 
 app.post('/webhook/agora', async (req, res) => {
-
   console.log('--- NOVO EVENTO RECEBIDO ---');
   console.log('Headers recebidos:', req.headers);
   console.log('Assinatura recebida:', req.headers['x-agora-signature']);
@@ -18,41 +17,40 @@ app.post('/webhook/agora', async (req, res) => {
     console.error('Assinatura inválida. A requisição será ignorada.');
     return res.status(401).send('Assinatura inválida!');
   }
-  res.status(200).send('OK');
 
-  const { data } = req.body;
-  const conversationId = data?.conversationId || req.body?.conversationId;
+  // 1. Extrai o conversationId corretamente a partir de dados ou da raiz
+  const conversationId = req.body?.dados?.conversationId || req.body?.conversationId;
 
-    await fetch(`${PLATFORM_API_URL}/bot/messages`, {
-        method: 'POST',
-        headers: {
+  if (!conversationId) {
+    console.error('conversationId não encontrado no body');
+    return res.status(400).send('conversationId ausente');
+  }
+
+  try {
+    // 2. Executa o fetch ANTES de encerrar a requisição com o res.status(200)
+    const respostaBot = await fetch(`${PLATFORM_API_URL}/bot/messages`, {
+      method: 'POST',
+      headers: {
         'Content-Type': 'application/json',
         'x-bot-token': BOT_TOKEN
-        },
-        body: JSON.stringify({
-            conversationId: conversationId,
-            text: 'Bom dia! ☀️ Encaminhando sua mensagem para o suporte. Em breve, um atendente irá te responder! ⏳'
-        })
+      },
+      body: JSON.stringify({
+        conversationId: conversationId,
+        text: 'Bom dia! ☀️ Encaminhando sua mensagem para o suporte. Em breve, um atendente irá te responder! ⏳'
+      })
     });
-        
-//   if (body.dados?.text?.trim().toLowerCase() === '!ping') {
-//     try {
-//       await fetch(`${PLATFORM_API_URL}/bot/messages`, {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//           'x-bot-token': BOT_TOKEN
-//         },
-//         body: JSON.stringify({
-//           conversationId: conversationId,
-//           text: 'Pong! 🏓'
-//         })
-//       });
-//     } catch (err) {
-//       console.error('Erro ao disparar mensagem:', err);
-//     }
-//   }
 
+    const statusBot = respostaBot.status;
+    const corpoBot = await respostaBot.text();
+    console.log(`Resposta do Bot Ágora [Status ${statusBot}]:`, corpoBot);
+
+    // 3. Responde com sucesso para o webhook do Ágora
+    return res.status(200).send('OK');
+
+  } catch (err) {
+    console.error('Erro ao disparar mensagem do bot:', err);
+    return res.status(500).send('Erro interno ao disparar bot');
+  }
 });
 
 app.listen(5500, () => {
