@@ -26,8 +26,11 @@ app.post('/webhook/agora', async (req, res) => {
     return res.status(200).send('Mensagem do dono do bot ignorada');
   }
 
-  try {
-    const response = await fetch(`${PLATFORM_API_URL}/bot/messages`, {
+try {
+    const urlDestino = `${PLATFORM_API_URL.replace(/\/$/, '')}/bot/messages`;
+    console.log('A chamar endpoint:', urlDestino);
+
+    const response = await fetch(urlDestino, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -39,10 +42,20 @@ app.post('/webhook/agora', async (req, res) => {
       })
     });
 
-    await response.text();
+    const respostaTexto = await response.text();
+    console.log(`Resposta Ágora (Status ${response.status}):`, respostaTexto);
+
+    if (!response.ok) {
+      return res.status(response.status).send(`Erro da plataforma: ${respostaTexto}`);
+    }
+
     return res.status(200).send('OK');
   } catch (error) {
-    return res.status(500).send('Erro interno ao disparar bot');
+    console.error('Detalhe do erro no fetch:', error);
+    return res.status(500).json({
+      mensagem: 'Erro interno ao disparar bot',
+      detalhe: error.message
+    });
   }
 });
 
