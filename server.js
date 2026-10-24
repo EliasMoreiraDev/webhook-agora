@@ -17,10 +17,9 @@ app.post('/webhook/agora', async (req, res) => {
   res.status(200).send('OK');
 
   const { data } = req.body;
-  const message = data?.message || req.body?.message || '';
   const conversationId = data?.conversationId || req.body?.conversationId;
 
-  if (message.trim().toLowerCase() === '!ping') {
+  if (body.dados?.text?.trim().toLowerCase() === '!ping') {
     try {
       await fetch(`${PLATFORM_API_URL}/bot/messages`, {
         method: 'POST',
