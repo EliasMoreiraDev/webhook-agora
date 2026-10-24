@@ -34,11 +34,11 @@ try {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-bot-token': BOT_TOKEN
+        'x-bot-token': BOT_TOKEN[cite: 2]
       },
       body: JSON.stringify({
-        conversationId: conversationId,
-        text: 'Bom dia! ☀️ Encaminhando sua mensagem para o suporte. Em breve, um atendente irá te responder! ⏳'
+        conversationId: conversationId,[cite: 2]
+        text: 'Bom dia! ☀️ Encaminhando sua mensagem para o suporte. Em breve, um atendente irá te responder! ⏳'[cite: 2]
       })
     });
 
