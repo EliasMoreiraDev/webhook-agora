@@ -19,23 +19,35 @@ app.post('/webhook/agora', async (req, res) => {
   const { data } = req.body;
   const conversationId = data?.conversationId || req.body?.conversationId;
 
-  if (body.dados?.text?.trim().toLowerCase() === '!ping') {
-    try {
-      await fetch(`${PLATFORM_API_URL}/bot/messages`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-bot-token': BOT_TOKEN
-        },
-        body: JSON.stringify({
-          conversationId: conversationId,
-          text: 'Pong! 🏓'
-        })
-      });
-    } catch (err) {
-      console.error('Erro ao disparar mensagem:', err);
-    }
-  }
+//   if (body.dados?.text?.trim().toLowerCase() === '!ping') {
+//     try {
+//       await fetch(`${PLATFORM_API_URL}/bot/messages`, {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json',
+//           'x-bot-token': BOT_TOKEN
+//         },
+//         body: JSON.stringify({
+//           conversationId: conversationId,
+//           text: 'Pong! 🏓'
+//         })
+//       });
+//     } catch (err) {
+//       console.error('Erro ao disparar mensagem:', err);
+//     }
+//   }
+
+    await fetch(`${PLATFORM_API_URL}/bot/messages`, {
+         method: 'POST',
+         headers: {
+           'Content-Type': 'application/json',
+           'x-bot-token': BOT_TOKEN
+         },
+         body: JSON.stringify({
+           conversationId: conversationId,
+           text: 'Bom dia! ☀️ Encaminhando sua mensagem para o suporte. Em breve, um atendente irá te responder! ⏳'
+         })
+       });
 });
 
 app.listen(5500, () => {
