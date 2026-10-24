@@ -26,38 +26,27 @@ app.post('/webhook/agora', async (req, res) => {
     return res.status(200).send('Mensagem do dono do bot ignorada');
   }
 
-try {
-    const urlDestino = `${PLATFORM_API_URL.replace(/\/$/, '')}/bot/messages`;
-    console.log('A chamar endpoint:', urlDestino);
-
-    const response = await fetch(urlDestino, {
+  try {
+    const response = await fetch(`${PLATFORM_API_URL}/bot/messages`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-bot-token': BOT_TOKEN[cite: 2]
+        'x-bot-token': BOT_TOKEN
       },
       body: JSON.stringify({
-        conversationId: conversationId,[cite: 2]
-        text: 'Bom dia! ☀️ Encaminhando sua mensagem para o suporte. Em breve, um atendente irá te responder! ⏳'[cite: 2]
+        conversationId: conversationId,
+        text: 'Bom dia! ☀️ Encaminhando sua mensagem para o suporte. Em breve, um atendente irá te responder! ⏳'
       })
     });
 
-    const respostaTexto = await response.text();
-    console.log(`Resposta Ágora (Status ${response.status}):`, respostaTexto);
-
-    if (!response.ok) {
-      return res.status(response.status).send(`Erro da plataforma: ${respostaTexto}`);
-    }
-
+    await response.text();
     return res.status(200).send('OK');
   } catch (error) {
-    console.error('Detalhe do erro no fetch:', error);
-    return res.status(500).json({
-      mensagem: 'Erro interno ao disparar bot',
-      detalhe: error.message
-    });
+    return res.status(500).send('Erro interno ao disparar bot');
   }
 });
 
 const PORT = process.env.PORT || 5500;
-app.listen(PORT, () => {});
+app.listen(PORT, () => {
+  console.log(`Servidor a correr na porta ${PORT}`);
+});
