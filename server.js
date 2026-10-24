@@ -9,11 +9,10 @@ const PLATFORM_API_URL = 'https://api.agora.fslab.dev';
 
 app.post('/webhook/agora', async (req, res) => {
 
-  const signature = req.headers['x-agora-signature'];
-
-  if (signature !== WEBHOOK_SECRET) {
-    return res.status(401).json({ error: 'Assinatura inválida' });
-  }
+  console.log('--- NOVO EVENTO RECEBIDO ---');
+  console.log('Headers recebidos:', req.headers);
+  console.log('Assinatura recebida:', req.headers['x-agora-signature']);
+  console.log('Body recebido:', req.body);
 
   res.status(200).send('OK');
 
