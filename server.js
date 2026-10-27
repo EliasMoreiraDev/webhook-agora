@@ -13,6 +13,10 @@ app.post('/webhook/agora', async (req, res) => {
   console.log('Assinatura recebida:', req.headers['x-agora-signature']);
   console.log('Body recebido:', req.body);
 
+  if (req.headers['x-agora-signature'] !== WEBHOOK_SECRET) {
+    console.error('Assinatura inválida. Acesso negado.');
+    return res.status(403).send('Assinatura inválida');
+  }
 
   // 1. Extrai o conversationId corretamente a partir de dados ou da raiz
   const conversationId = req.body?.dados?.conversationId || req.body?.conversationId;
@@ -20,6 +24,10 @@ app.post('/webhook/agora', async (req, res) => {
   if (!conversationId) {
     console.error('conversationId não encontrado no body');
     return res.status(400).send('conversationId ausente');
+  }
+  if(req.body.dados.senderId === '6a73e92d7237502b187d79ff') {
+    console.log('Mensagem enviada pelo bot, ignorando...');
+    return res.status(200).send('Mensagem do bot ignorada');
   }
 
   try {
